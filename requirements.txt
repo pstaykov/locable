@@ -1,0 +1,4 @@
+chromadb==0.4.24
+ollama==0.1.18
+requests==2.31.0
+numpy==1.24.3

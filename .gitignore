@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Chroma vector store (large, can be regenerated)
+data/chroma/documents.json
+data/chroma/embeddings.npy
+data/chroma/ids.json
+data/chroma/metadatas.json
+
+# Generated sites (can be regenerated)
+site/index.html
+site/static/styles.css
+site/static/script.js
+site/static/bootstrap.min.css
+site/static/bootstrap.bundle.min.js
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Ollama models (local, don't commit)
+.ollama/
+
+# Environment variables
+.env
+.env.local
