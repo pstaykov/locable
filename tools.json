@@ -1,0 +1,52 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "write_file",
+      "description": "Write full content to a file. Creates or overwrites the file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path relative to the working directory"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content to write into the file"
+          }
+        },
+        "required": ["path", "content"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "read_file",
+      "description": "Read the content of a file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path of the file to read"
+          }
+        },
+        "required": ["path"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "list_files",
+      "description": "List all files in the working directory and subdirectories.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  }
+]
