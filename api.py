@@ -1,8 +1,10 @@
 import asyncio
+import os
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .agent.builder_agent import BuilderAgent
@@ -13,6 +15,14 @@ app = FastAPI(
     description="FastAPI wrapper exposing the builder agent for frontend use.",
     version="0.1.0",
 )
+
+# Get the directory containing this file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SITE_DIR = os.path.join(BASE_DIR, "site")
+
+# Mount static files
+if os.path.exists(SITE_DIR):
+    app.mount("/static", StaticFiles(directory=os.path.join(SITE_DIR, "static")), name="static")
 
 
 class GenerateRequest(BaseModel):
@@ -37,6 +47,15 @@ async def _run_builder(req: GenerateRequest) -> str:
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/")
+async def root():
+    """Serve the index.html file."""
+    index_path = os.path.join(SITE_DIR, "index.html")
+    if not os.path.exists(index_path):
+        raise HTTPException(status_code=404, detail="index.html not found")
+    return FileResponse(index_path, media_type="text/html")
 
 
 @app.get("/files", response_model=List[str])

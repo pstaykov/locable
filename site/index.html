@@ -3,121 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sushi Palace</title>
+  <title>Locable Builder - AI Website Generator</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
-  <!-- Hero Section -->
-  <section class="hero-section text-center py-5 bg-light">
-    <div class="container">
-      <h1 class="display-4">Welcome to Sushi Palace</h1>
-      <p class="lead">Experience the art of sushi making in a luxurious setting.</p>
-    </div>
-  </section>
+  <div class="container-fluid h-100 d-flex flex-column">
+    <!-- Header -->
+    <header class="navbar navbar-dark bg-dark py-2 border-bottom">
+      <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">
+          <i class="bi bi-zap-fill"></i> Locable Builder
+        </span>
+        <span class="text-muted small">AI-Powered Website Generator</span>
+      </div>
+    </header>
 
-  <!-- Menu Section -->
-  <section class="menu-section py-5">
-    <div class="container">
-      <h2 class="text-center mb-4">Our Menu</h2>
-      <div class="row row-cols-1 row-cols-md-3 g-4">
-        <!-- Card 1 -->
-        <div class="col">
-          <div class="card border-0 shadow h-100">
-            <img src="https://via.placeholder.com/250x150" alt="Sushi Roll 1" class="card-img-top">
-            <div class="card-body">
-              <h5 class="card-title">California Roll</h5>
-              <p class="card-text">Fresh salmon, avocado, cucumber, and crab meat.</p>
+    <!-- Main Content Area -->
+    <div class="content-wrapper flex-grow-1 d-flex overflow-hidden">
+      <!-- Left Sidebar - File Explorer -->
+      <div class="file-explorer bg-light border-end">
+        <div class="file-explorer-header p-3 border-bottom">
+          <h5 class="mb-0">
+            <i class="bi bi-folder-fill"></i> Files
+          </h5>
+        </div>
+        <div class="file-list p-3 overflow-auto" id="fileList">
+          <div class="text-muted text-center py-5">
+            <p class="small">No files generated yet</p>
+            <p class="small">Generate a website to see files here</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle - Preview Area -->
+      <div class="preview-area flex-grow-1 d-flex flex-column overflow-hidden">
+        <div class="preview-header bg-white border-bottom p-2 d-flex align-items-center gap-2">
+          <input type="text" class="form-control form-control-sm" id="previewUrl" placeholder="Preview URL" disabled>
+          <button class="btn btn-sm btn-outline-secondary" id="refreshPreviewBtn" title="Refresh">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" id="fullscreenBtn" title="Fullscreen">
+            <i class="bi bi-fullscreen"></i>
+          </button>
+        </div>
+        <iframe id="previewFrame" class="preview-frame flex-grow-1" sandbox="allow-same-origin allow-scripts allow-forms" title="Website Preview"></iframe>
+      </div>
+
+      <!-- Right Sidebar - Chat -->
+      <div class="chat-panel bg-white border-start d-flex flex-column">
+        <div class="chat-header bg-primary text-white p-3 border-bottom">
+          <h5 class="mb-0">
+            <i class="bi bi-chat-dots-fill"></i> Chat
+          </h5>
+        </div>
+
+        <div class="chat-messages flex-grow-1 p-3 overflow-auto" id="chatMessages">
+          <div class="chat-message system">
+            <div class="message-content">
+              <strong>Locable Assistant:</strong>
+              <p>Hello! I'm your AI website builder. Describe the website you want, and I'll generate it for you. For example: "Create a landing page for a coffee shop" or "Build a portfolio website".</p>
             </div>
           </div>
         </div>
 
-        <!-- Card 2 -->
-        <div class="col">
-          <div class="card border-0 shadow h-100">
-            <img src="https://via.placeholder.com/250x150" alt="Sushi Roll 2" class="card-img-top">
-            <div class="card-body">
-              <h5 class="card-title">Philadelphia Roll</h5>
-              <p class="card-text">Smoked salmon, cream cheese, avocado, and cucumber.</p>
-            </div>
+        <div class="chat-input-area p-3 border-top">
+          <div class="input-group">
+            <input 
+              type="text" 
+              class="form-control" 
+              id="chatInput" 
+              placeholder="Type your request..."
+              disabled
+            />
+            <button class="btn btn-primary" id="sendBtn" type="button" disabled>
+              <i class="bi bi-send-fill"></i>
+            </button>
           </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="col">
-          <div class="card border-0 shadow h-100">
-            <img src="https://via.placeholder.com/250x150" alt="Sushi Roll 3" class="card-img-top">
-            <div class="card-body">
-              <h5 class="card-title">Dragon Roll</h5>
-              <p class="card-text">Salmon, yellowtail, avocado, and cucumber.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="col">
-          <div class="card border-0 shadow h-100">
-            <img src="https://via.placeholder.com/250x150" alt="Sushi Roll 4" class="card-img-top">
-            <div class="card-body">
-              <h5 class="card-title">Rainbow Roll</h5>
-              <p class="card-text">Tuna, yellowtail, salmon, and cucumber.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 5 -->
-        <div class="col">
-          <div class="card border-0 shadow h-100">
-            <img src="https://via.placeholder.com/250x150" alt="Sushi Roll 5" class="card-img-top">
-            <div class="card-body">
-              <h5 class="card-title">Spider Roll</h5>
-              <p class="card-text">Tuna, salmon, yellowtail, avocado, and cucumber.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 6 -->
-        <div class="col">
-          <div class="card border-0 shadow h-100">
-            <img src="https://via.placeholder.com/250x150" alt="Sushi Roll 6" class="card-img-top">
-            <div class="card-body">
-              <h5 class="card-title">Mango Sticky Rice Roll</h5>
-              <p class="card-text">Fresh mango, sticky rice, and avocado.</p>
-            </div>
+          <div class="form-check mt-2 small">
+            <input class="form-check-input" type="checkbox" id="debugMode" />
+            <label class="form-check-label" for="debugMode">
+              Debug mode
+            </label>
           </div>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- Contact Section -->
-  <section class="contact-section py-5 bg-light">
-    <div class="container">
-      <h2 class="text-center mb-4">Contact Us</h2>
-      <form>
-        <div class="mb-3">
-          <label for="name" class="form-label">Name</label>
-          <input type="text" class="form-control" id="name" required>
-        </div>
-        <div class="mb-3">
-          <label for="email" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="email" required>
-        </div>
-        <div class="mb-3">
-          <label for="message" class="form-label">Message</label>
-          <textarea class="form-control" id="message" rows="4" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Send Message</button>
-      </form>
-    </div>
-  </section>
+    <!-- Status Bar -->
+    <footer class="status-bar bg-light border-top px-3 py-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="status-text small text-muted">Ready</span>
+        <span class="small text-muted" id="generationTime"></span>
+      </div>
+    </footer>
+  </div>
 
-  <!-- Footer -->
-  <footer class="bg-dark text-white text-center py-3">
-    <div class="container">
-      &copy; 2023 Sushi Palace. All rights reserved.
+  <!-- Loading Spinner Modal -->
+  <div class="modal fade" id="loadingModal" tabindex="-1" backdrop="static" keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center py-5">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <h5>Generating your website...</h5>
+          <p class="text-muted small" id="generatingMessage">This may take a moment</p>
+        </div>
+      </div>
     </div>
-  </footer>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="static/script.js"></script>
