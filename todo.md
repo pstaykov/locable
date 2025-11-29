@@ -1,14 +1,2 @@
-- [ ] CSS packs: bootstrap.min.css + bootstrap.theme.css; :root tokens for color/spacing/radius/shadow/type/motion; token-to-bootstrap mapping table; versioned pack names; usage snippet per pack
-- [ ] Theme guardrails: only approved CSS packs; no ad-hoc colors/fonts; no inline styles except token-safe overrides; validator to enforce tokens
-- [ ] Template library: hero/marketing/dashboard/form-heavy/page-shell layouts; responsive grids + container widths; documented slots; sample content blocks
-- [ ] Scaffolds: base index.html with head/meta/links; navbar/footer variants; optional sidebar shell; print-friendly hook
-- [ ] Component recipes: cards (media/badges), stats tiles, timelines, CTA bars, tables (sticky + striped), form groups (help/error), modal/drawer patterns; snippets show token use
-- [ ] Multi-site flow: batch page specs; pick pack + template per page; shared assets folder; consistent nav/footer; cross-page type/spacing harmony check
-- [ ] GUI builder mode: UI for theme pick + template select + content slots; live preview wired to bootstrap.bundle.min.js; export/download HTML+CSS bundle
-- [ ] Asset rules: image aspect ratios per template; placeholder defaults; icon set choice; corner treatment tiers; gradient/shadow tiers; motion durations/easings
-- [ ] Prompt guardrails: reminders to use predefined packs/templates; forbid new class names; require semantic HTML + ARIA; pre-output checklist injection
-- [ ] Quality gates: HTML lint; accessibility (contrast/labels/focus-visible); responsive breakpoints sanity; no remote fonts/scripts unless whitelisted
-- [ ] Visual regression: Playwright screenshot harness per template+pack; golden images stored locally; compare on change
-- [ ] Content heuristics: headline/subhead length ranges; verb-first buttons; list density limits; domain-specific placeholders instead of lorem ipsum
-- [ ] Evaluation set: sample page specs with expected components/layout; pass/fail rules; track model performance over time
-- [ ] Documentation: short README for packs/templates/recipes; usage examples; troubleshooting; changelog for tokens and templates
+- [ ] CSS template model that only generates html
+- [ ] few shot prompting with examples so the model knows what a good website looks like

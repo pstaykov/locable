@@ -1,7 +1,7 @@
 import os
 import glob
 import json
-from typing import List, Dict
+from typing import List, Dict, Any, Optional
 
 # try to import chromadb and its Settings helper (not all versions expose Settings)
 try:
@@ -187,7 +187,9 @@ class ChromaVectorStore:
         print(f"Indexed {len(all_docs)} chunks into Chroma collection '{self.collection_name}' at '{self.persist_dir}'.")
         return len(all_docs)
 
-    def query(self, query_text: str, n_results: int = 3):
+    def query(self, query_text: str, n_results: int = 3, where: Optional[Dict[str, Any]] = None, include: Optional[List[str]] = None):
+        """Query the collection with optional metadata filtering."""
+        include = include or ["documents", "metadatas", "distances"]
         q_emb_raw = embed(query_text)
         q_emb = q_emb_raw.tolist() if hasattr(q_emb_raw, "tolist") else q_emb_raw
         # new APIs typically want query_embeddings list-of-vectors
@@ -195,11 +197,15 @@ class ChromaVectorStore:
             results = self.collection.query(
                 query_embeddings=[q_emb],
                 n_results=n_results,
-                include=["documents", "metadatas", "distances"]
+                where=where if where else None,
+                include=include,
             )
         except Exception:
             # fallback older signature
-            results = self.collection.query(query_text, n_results=n_results, include=["documents", "metadatas", "distances"])
+            try:
+                results = self.collection.query(query_text, n_results=n_results, where=where, include=include)
+            except TypeError:
+                results = self.collection.query(query_text, n_results=n_results, include=include)
         # If chroma returned empty documents, fallback to local brute-force search using saved snapshot
         try:
             docs = results.get("documents") or results.get("documents", [])
@@ -208,7 +214,10 @@ class ChromaVectorStore:
         except Exception:
             pass
 
-        # fallback: brute-force from local snapshot
+        # fallback: brute-force from local snapshot (only when no metadata filter is applied)
+        if where:
+            return results
+
         emb_path = os.path.join(self.persist_dir, "embeddings.npy")
         docs_path = os.path.join(self.persist_dir, "documents.json")
         if os.path.exists(emb_path) and os.path.exists(docs_path):
@@ -224,6 +233,19 @@ class ChromaVectorStore:
                 pass
 
         return results
+
+    def get(self, where: Optional[Dict[str, Any]] = None, limit: Optional[int] = None, include: Optional[List[str]] = None):
+        """Fetch documents by metadata filter without an embedding query."""
+        include = include or ["documents", "metadatas", "ids"]
+        if hasattr(self.collection, "get"):
+            try:
+                return self.collection.get(where=where, limit=limit, include=include)
+            except TypeError:
+                try:
+                    return self.collection.get(where=where, limit=limit)
+                except Exception:
+                    pass
+        return {"documents": [], "metadatas": [], "ids": []}
 
 
 if __name__ == "__main__":

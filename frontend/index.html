@@ -11,77 +11,75 @@
 <body>
   <div class="container-fluid h-100 d-flex flex-column">
     <!-- Header -->
-    <header class="navbar navbar-dark bg-dark py-2 border-bottom">
+    <header class="navbar">
       <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">
-          <i class="bi bi-zap-fill"></i> Locable Builder
+        <span class="navbar-brand">
+          <i class="bi bi-lightning-charge-fill"></i> Locable Builder
         </span>
-        <span class="text-muted small">AI-Powered Website Generator</span>
+        <span class="text-muted small">AI Website Generator</span>
       </div>
     </header>
 
     <!-- Main Content Area -->
-    <div class="content-wrapper flex-grow-1 d-flex overflow-hidden">
+    <div class="content-wrapper">
       <!-- Left Sidebar - File Explorer -->
-      <div class="file-explorer bg-light border-end">
-        <div class="file-explorer-header p-3 border-bottom">
-          <h5 class="mb-0">
-            <i class="bi bi-folder-fill"></i> Files
-          </h5>
+      <div class="file-explorer panel">
+        <div class="resizer resizer-right"></div>
+        <div class="file-explorer-header">
+          <h5><i class="bi bi-folder2"></i> Files</h5>
         </div>
-        <div class="file-list p-3 overflow-auto" id="fileList">
-          <div class="text-muted text-center py-5">
-            <p class="small">No files generated yet</p>
-            <p class="small">Generate a website to see files here</p>
+        <div class="file-list" id="fileList">
+          <div class="text-center py-5" style="color: var(--muted); font-size: 0.85rem;">
+            <p class="mb-2">No files yet</p>
+            <p class="mb-0" style="font-size: 0.75rem; opacity: 0.7;">Generate a website to start</p>
           </div>
         </div>
       </div>
 
       <!-- Middle - Preview Area -->
-      <div class="preview-area flex-grow-1 d-flex flex-column overflow-hidden">
-        <div class="preview-header bg-white border-bottom p-2 d-flex align-items-center gap-2">
-          <input type="text" class="form-control form-control-sm" id="previewUrl" placeholder="Preview URL" disabled>
-          <button class="btn btn-sm btn-outline-secondary" id="refreshPreviewBtn" title="Refresh">
+      <div class="preview-area">
+        <div class="preview-header">
+          <input type="text" class="form-control form-control-sm flex-grow-1" id="previewUrl" placeholder="No preview loaded" disabled>
+          <button class="btn btn-sm" id="refreshPreviewBtn" title="Refresh">
             <i class="bi bi-arrow-clockwise"></i>
           </button>
-          <button class="btn btn-sm btn-outline-secondary" id="fullscreenBtn" title="Fullscreen">
-            <i class="bi bi-fullscreen"></i>
+          <button class="btn btn-sm" id="fullscreenBtn" title="Fullscreen">
+            <i class="bi bi-arrows-fullscreen"></i>
           </button>
         </div>
-        <iframe id="previewFrame" class="preview-frame flex-grow-1" sandbox="allow-same-origin allow-scripts allow-forms" title="Website Preview"></iframe>
+        <iframe id="previewFrame" class="preview-frame" sandbox="allow-same-origin allow-scripts allow-forms" title="Website Preview"></iframe>
       </div>
 
-      <!-- Right Sidebar - Chat -->
-      <div class="chat-panel bg-white border-start d-flex flex-column">
-        <div class="chat-header bg-primary text-white p-3 border-bottom">
-          <h5 class="mb-0">
-            <i class="bi bi-chat-dots-fill"></i> Chat
-          </h5>
+      <!-- Right Sidebar - Chat (Thinner) -->
+      <div class="chat-panel panel">
+        <div class="resizer resizer-left"></div>
+        <div class="chat-header">
+          <h5><i class="bi bi-chat-dots"></i> Assistant</h5>
         </div>
 
-        <div class="chat-messages flex-grow-1 p-3 overflow-auto" id="chatMessages">
+        <div class="chat-messages" id="chatMessages">
           <div class="chat-message system">
             <div class="message-content">
-              <strong>Locable Assistant:</strong>
-              <p>Hello! I'm your AI website builder. Describe the website you want, and I'll generate it for you. For example: "Create a landing page for a coffee shop" or "Build a portfolio website".</p>
+              <strong>Assistant</strong>
+              <p>Describe the website you want to create. For example: "Create a landing page for a coffee shop" or "Build a portfolio website".</p>
             </div>
           </div>
         </div>
 
-        <div class="chat-input-area p-3 border-top">
+        <div class="chat-input-area">
           <div class="input-group">
             <input 
               type="text" 
               class="form-control" 
               id="chatInput" 
-              placeholder="Type your request..."
+              placeholder="Describe your website..."
               disabled
             />
-            <button class="btn btn-primary" id="sendBtn" type="button" disabled>
+            <button class="btn" id="sendBtn" type="button" disabled>
               <i class="bi bi-send-fill"></i>
             </button>
           </div>
-          <div class="form-check mt-2 small">
+          <div class="form-check mt-2">
             <input class="form-check-input" type="checkbox" id="debugMode" />
             <label class="form-check-label" for="debugMode">
               Debug mode
@@ -92,24 +90,24 @@
     </div>
 
     <!-- Status Bar -->
-    <footer class="status-bar bg-light border-top px-3 py-2">
+    <footer class="status-bar">
       <div class="d-flex justify-content-between align-items-center">
-        <span class="status-text small text-muted">Ready</span>
-        <span class="small text-muted" id="generationTime"></span>
+        <span class="status-text">Ready</span>
+        <span id="generationTime"></span>
       </div>
     </footer>
   </div>
 
   <!-- Loading Spinner Modal -->
-  <div class="modal fade" id="loadingModal" tabindex="-1" backdrop="static" keyboard="false">
+  <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-body text-center py-5">
-          <div class="spinner-border text-primary mb-3" role="status">
+          <div class="spinner-border mb-3" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
-          <h5>Generating your website...</h5>
-          <p class="text-muted small" id="generatingMessage">This may take a moment</p>
+          <h5>Generating website...</h5>
+          <p class="text-muted small mb-0" id="generatingMessage">This may take a moment</p>
         </div>
       </div>
     </div>

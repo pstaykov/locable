@@ -21,11 +21,16 @@ let startTime = null;
 let currentRunId = null;
 let messageCursor = 0;
 
+// Resizer functionality
+let isResizing = false;
+let currentResizer = null;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   chatInput.disabled = false;
   sendBtn.disabled = false;
   checkHealth();
+  initResizers();
 });
 
 // Event Listeners
@@ -54,6 +59,59 @@ fullscreenBtn.addEventListener('click', () => {
   }
 });
 
+// Initialize resizers for draggable panels
+function initResizers() {
+  const fileExplorer = document.querySelector('.file-explorer');
+  const chatPanel = document.querySelector('.chat-panel');
+  const fileResizer = fileExplorer.querySelector('.resizer-right');
+  const chatResizer = chatPanel.querySelector('.resizer-left');
+
+  // File explorer resizer
+  fileResizer.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    currentResizer = 'file-explorer';
+    fileResizer.classList.add('resizing');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  // Chat panel resizer
+  chatResizer.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    currentResizer = 'chat-panel';
+    chatResizer.classList.add('resizing');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+
+    if (currentResizer === 'file-explorer') {
+      const newWidth = e.clientX;
+      if (newWidth >= 150 && newWidth <= 500) {
+        fileExplorer.style.width = `${newWidth}px`;
+      }
+    } else if (currentResizer === 'chat-panel') {
+      const newWidth = window.innerWidth - e.clientX;
+      if (newWidth >= 250 && newWidth <= 600) {
+        chatPanel.style.width = `${newWidth}px`;
+      }
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      currentResizer = null;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      fileResizer.classList.remove('resizing');
+      chatResizer.classList.remove('resizing');
+    }
+  });
+}
+
 // Check API Health
 async function checkHealth() {
   try {
@@ -62,7 +120,7 @@ async function checkHealth() {
     addSystemMessage('Connected to API server');
     statusText.textContent = 'Connected';
   } catch (error) {
-    addSystemMessage('Error: Cannot connect to API server. Make sure it is running on port 8000.');
+    addSystemMessage('Cannot connect to API server. Ensure it is running on port 8000.');
     statusText.textContent = 'Disconnected';
     chatInput.disabled = true;
     sendBtn.disabled = true;
@@ -74,11 +132,8 @@ async function sendMessage() {
   const prompt = chatInput.value.trim();
   if (!prompt || isGenerating) return;
 
-  // Add user message to chat
   addUserMessage(prompt);
   chatInput.value = '';
-
-  // Generate website
   await generateWebsite(prompt);
 }
 
@@ -92,7 +147,6 @@ async function generateWebsite(prompt) {
   sendBtn.disabled = true;
   statusText.textContent = 'Generating...';
 
-  // Show loading modal
   const modal = new bootstrap.Modal(loadingModal);
   modal.show();
 
@@ -120,17 +174,12 @@ async function generateWebsite(prompt) {
     currentRunId = result.run_id || null;
     messageCursor = 0;
 
-    // Update generation time
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
     generationTime.textContent = `Generated in ${elapsed}s`;
 
-    // Load chat history from API (user + assistant only)
     await loadMessages(true);
-
-    // Load files
     await loadFiles(result.files);
 
-    // Load preview
     if (result.files.length > 0) {
       const htmlFiles = result.files.filter((f) => f.endsWith('.html'));
       if (htmlFiles.length > 0) {
@@ -139,11 +188,11 @@ async function generateWebsite(prompt) {
     }
 
     statusText.textContent = 'Ready';
-    addSystemMessage(`? Website generated successfully with ${result.files.length} files!`);
+    addSystemMessage(`Website generated with ${result.files.length} files`);
   } catch (error) {
     console.error('Generation error:', error);
     statusText.textContent = 'Error';
-    addSystemMessage(`?? Error: ${error.message}`);
+    addSystemMessage(`Error: ${error.message}`);
   } finally {
     isGenerating = false;
     chatInput.disabled = false;
@@ -157,12 +206,10 @@ async function loadFiles(files) {
   currentGeneratedFiles = files;
 
   if (files.length === 0) {
-    fileList.innerHTML =
-      '<div class="text-muted text-center py-5"><p class="small">No files generated</p></div>';
+    fileList.innerHTML = '<div class="text-center py-5" style="color: var(--muted); font-size: 0.85rem;"><p>No files generated</p></div>';
     return;
   }
 
-  // Organize files by directory
   const fileTree = {};
   files.forEach((file) => {
     const parts = file.split('/');
@@ -194,13 +241,10 @@ function renderFileTree(tree, container, prefix) {
 
         const header = document.createElement('div');
         header.className = 'file-item';
-        header.innerHTML = `
-        <i class="bi bi-folder"></i>
-        <span class="file-item-name">${key}</span>
-      `;
+        header.innerHTML = `<i class="bi bi-folder"></i><span class="file-item-name">${key}</span>`;
 
         const children = document.createElement('div');
-        children.style.paddingLeft = '16px';
+        children.style.paddingLeft = '12px';
         children.className = 'file-children';
 
         folder.appendChild(header);
@@ -214,17 +258,13 @@ function renderFileTree(tree, container, prefix) {
         file.style.cursor = 'pointer';
 
         const ext = key.split('.').pop().toLowerCase();
-        let icon = 'bi-file';
+        let icon = 'bi-file-earmark';
         if (['html', 'htm'].includes(ext)) icon = 'bi-file-earmark-code';
-        else if (['css'].includes(ext)) icon = 'bi-file-earmark-css';
-        else if (['js'].includes(ext)) icon = 'bi-file-earmark-js';
-        else if (['json'].includes(ext)) icon = 'bi-file-earmark-code';
-        else if (['md'].includes(ext)) icon = 'bi-file-earmark-text';
+        else if (['css'].includes(ext)) icon = 'bi-filetype-css';
+        else if (['js'].includes(ext)) icon = 'bi-filetype-js';
+        else if (['json'].includes(ext)) icon = 'bi-filetype-json';
 
-        file.innerHTML = `
-        <i class="bi ${icon}"></i>
-        <span class="file-item-name">${key}</span>
-      `;
+        file.innerHTML = `<i class="bi ${icon}"></i><span class="file-item-name">${key}</span>`;
 
         file.addEventListener('click', () => {
           document.querySelectorAll('.file-item.active').forEach((el) => el.classList.remove('active'));
@@ -250,32 +290,27 @@ async function loadFilePreview(filePath) {
       previewFrame.srcdoc = content;
       previewUrl.value = filePath;
     } else {
-      // Show text content in preview
       const encoded = content
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/>/g, '&gt;');
 
       previewFrame.srcdoc = `
         <html>
           <head>
             <style>
-              body { font-family: monospace; margin: 20px; white-space: pre-wrap; word-wrap: break-word; }
-              code { display: block; background: #f5f5f5; padding: 10px; border-radius: 4px; }
+              body { font-family: monospace; margin: 20px; white-space: pre-wrap; background: #1a1c21; color: #f7f7f7; }
+              code { display: block; background: #16181c; padding: 15px; border-radius: 6px; border: 1px solid #2a2d33; }
             </style>
           </head>
-          <body>
-            <code>${encoded}</code>
-          </body>
+          <body><code>${encoded}</code></body>
         </html>
       `;
       previewUrl.value = filePath;
     }
   } catch (error) {
     console.error('Error loading file:', error);
-    previewFrame.srcdoc = `<html><body><p>Error loading file: ${error.message}</p></body></html>`;
+    previewFrame.srcdoc = `<html><body style="padding: 20px; background: #1a1c21; color: #f7f7f7;"><p>Error loading file: ${error.message}</p></body></html>`;
   }
 }
 
@@ -289,11 +324,7 @@ function loadPreview(htmlFile) {
 function addUserMessage(text) {
   const messageDiv = document.createElement('div');
   messageDiv.className = 'chat-message user';
-  messageDiv.innerHTML = `
-    <div class="message-content">
-      ${escapeHtml(text)}
-    </div>
-  `;
+  messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -301,12 +332,7 @@ function addUserMessage(text) {
 function addSystemMessage(text) {
   const messageDiv = document.createElement('div');
   messageDiv.className = 'chat-message system';
-  messageDiv.innerHTML = `
-    <div class="message-content">
-      <strong>Locable Assistant:</strong>
-      <p>${escapeHtml(text)}</p>
-    </div>
-  `;
+  messageDiv.innerHTML = `<div class="message-content"><strong>Assistant</strong><p>${escapeHtml(text)}</p></div>`;
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -314,12 +340,7 @@ function addSystemMessage(text) {
 function addAssistantMessage(text) {
   const messageDiv = document.createElement('div');
   messageDiv.className = 'chat-message system';
-  messageDiv.innerHTML = `
-    <div class="message-content">
-      <strong>Locable Assistant:</strong>
-      <p>${escapeHtml(text)}</p>
-    </div>
-  `;
+  messageDiv.innerHTML = `<div class="message-content"><strong>Assistant</strong><p>${escapeHtml(text)}</p></div>`;
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }

@@ -2,7 +2,14 @@ import re
 import json
 import os
 from pathlib import Path
-from .tools import write_file, read_file, list_files, load_tools, load_system_prompt
+from .tools import (
+    ROOT_DIR,
+    write_file,
+    read_file,
+    list_files,
+    load_tools,
+    load_system_prompt,
+)
 from .final_model import FinalModelClient
 from ..rag.vectorstore import LocalVectorStore
 
@@ -10,8 +17,8 @@ from ..rag.vectorstore import LocalVectorStore
 class BuilderAgent:
     """
     Builder agent that coordinates model calls, message flow, and tool execution.
-    This version removes the fallback scaffold and enforces model-directed building.
-    Phase 1 (information gathering) is still supported.
+    Uses retrieval over Bootstrap templates (with descriptions and CSS chunks)
+    to ground the model's generations.
     """
 
     def __init__(self, model=None, host=None):
@@ -41,7 +48,7 @@ class BuilderAgent:
         This method forces all writes into site/ for safety, and rewrites Bootstrap CDN paths.
         """
 
-        print(f"\n[DEBUG execute_tool] Called with name='{name}'")
+        print(f"[DEBUG execute_tool] Called with name='{name}'")
         print(f"[DEBUG] args: {args}")
 
         if name == "write_file":
@@ -50,16 +57,16 @@ class BuilderAgent:
             if not path:
                 return "ERROR: missing path"
 
-            # normalize path into site/
+            # normalize path into site/ anchored at package root
             p = Path(path)
             print(f"[DEBUG] Original path: {path}")
-            
+
             if not p.parts or p.parts[0] != "site":
                 p = Path("site") / p
-            
-            full = p.resolve()
+
+            full = (ROOT_DIR / p).resolve()
             print(f"[DEBUG] Full resolved path: {full}")
-            
+
             os.makedirs(full.parent, exist_ok=True)
             print(f"[DEBUG] Created directory: {full.parent}")
 
@@ -99,33 +106,60 @@ class BuilderAgent:
     # -------------------------------------------------------------
     def _append_retrieval_context(self, user_input, k=5):
         """
-        Perform Bootstrap-component retrieval using the local vector store and
-        inject results as a system message. This improves model grounding.
+        Inject template suggestions (by description distance), CSS samples, and
+        component chunks into the conversation to ground generations.
         """
 
+        snippet_parts = []
+
+        # Template suggestions based on description similarity
         try:
-            hits = self.store.search(user_input, k)
-        except Exception:
-            return False
+            template_hits = self.store.search_templates(user_input, k=3)
+        except Exception as e:
+            print(f"[DEBUG] template search failed: {e}")
+            template_hits = []
 
-        # normalize retrieved docs
-        if isinstance(hits, dict):
+        if template_hits:
+            snippet_parts.append("--- Template suggestions (by description distance) ---")
+            for hit in template_hits:
+                dist_val = hit.get("distance")
+                dist_txt = f"{dist_val:.3f}" if isinstance(dist_val, (int, float)) else "n/a"
+                snippet_parts.append(f"{hit.get('template')}: {hit.get('description')} (dist={dist_txt})")
+
+            top_template = template_hits[0].get("template")
+            if top_template:
+                try:
+                    css_chunks = self.store.fetch_css_chunks(top_template, limit=3)
+                except Exception as e:
+                    print(f"[DEBUG] css fetch failed: {e}")
+                    css_chunks = []
+                if css_chunks:
+                    snippet_parts.append(f"CSS samples from {top_template} (trimmed):")
+                    for i, chunk in enumerate(css_chunks, 1):
+                        text = (chunk.get("text") or "")[:420].replace("\n", " ")
+                        snippet_parts.append(f"[CSS {i}] {text}")
+
+        # General component chunks
+        try:
+            hits = self.store.search(user_input, k=k, include_meta=True)
+        except Exception as e:
+            print(f"[DEBUG] search failed: {e}")
+            hits = None
+
+        if hits:
             docs = (hits.get("documents") or [[]])[0]
-        elif isinstance(hits, list):
-            docs = hits
-        else:
-            try:
-                docs = list(hits)
-            except:
-                docs = []
+            metas = (hits.get("metadatas") or [[]])[0]
+            if docs:
+                snippet_parts.append("--- Retrieved component chunks ---")
+                for i, doc in enumerate(docs[:k]):
+                    meta = metas[i] or {}
+                    label = meta.get("template") or meta.get("source") or ""
+                    snippet_parts.append(f"[{i+1}] {label} :: {doc[:600].replace('\n', ' ')}")
 
-        if not docs:
+        if not snippet_parts:
             return False
 
-        snippet = "\n\n--- Retrieved Bootstrap context ---\n\n"
-        for i, d in enumerate(docs[:k]):
-            snippet += f"[{i+1}] {d[:1500].replace('\\n',' ')}\n\n"
-
+        snippet = "\n\n".join(snippet_parts) + "\n"
         self.messages.append({"role": "system", "content": snippet})
         return True
 
@@ -141,7 +175,7 @@ class BuilderAgent:
         tool_name = fn.get("name") or call.get("name")
         raw_args = fn.get("arguments") if fn else call.get("arguments")
 
-        print(f"\n[DEBUG _exec_tool_call] tool_name: {tool_name}")
+        print(f"[DEBUG _exec_tool_call] tool_name: {tool_name}")
         print(f"[DEBUG] raw_args type: {type(raw_args)}")
         print(f"[DEBUG] raw_args: {raw_args}")
 
@@ -177,7 +211,7 @@ class BuilderAgent:
 
         executed = False
 
-        print("\n[DEBUG _execute_json_tool_calls] Checking for embedded tool calls...")
+        print("[DEBUG _execute_json_tool_calls] Checking for embedded tool calls...")
         
         # Split by ```json markers
         blocks = assistant_text.split("```json")
@@ -186,11 +220,11 @@ class BuilderAgent:
         for i, block in enumerate(blocks[1:], 1):  # Skip first element (text before first ```json)
             # Extract content before closing ```
             if "```" in block:
-                json_content = block.split("```")[0].strip()
+                json_content = block.split("```", 1)[0].strip()
             else:
                 json_content = block.strip()
 
-            print(f"\n[DEBUG] Block {i} content preview: {json_content[:100]}...")
+            print(f"[DEBUG] Block {i} content preview: {json_content[:100]}...")
             
             if not json_content or '"name"' not in json_content:
                 print(f"[DEBUG] Block {i} skipped (no 'name' field)")
@@ -202,7 +236,7 @@ class BuilderAgent:
                 print(f"[DEBUG] Block {i} parsed successfully")
             except Exception as e:
                 print(f"[DEBUG] Block {i} JSON parse failed: {e}")
-                # Try to convert Python dict → JSON
+                # Try to convert Python dict into JSON
                 try:
                     fixed = json_content.replace("'", "\"")
                     parsed = json.loads(fixed)
