@@ -20,7 +20,7 @@ None (local-only). Ensure the server is not exposed publicly.
   "prompt": "build a cafe landing page",
   "model": "qwen2.5-coder:14b-instruct",   // optional override
   "host": "http://localhost:11434",        // optional override
-  "debug": false                             // optional; logs full agent responses server-side
+  "debug": false                           // optional; logs full agent responses server-side
 }
 ```
 - Behavior: Calls the agent, which may iterate tool calls and write files under `site/`.
@@ -29,6 +29,7 @@ None (local-only). Ensure the server is not exposed publicly.
 {
   "status": "ok",
   "message": "short final summary from the agent",
+  "run_id": "9f4c0e8dd34a42a0b1e7462c4d61c1f8",
   "files": [
     "site/index.html",
     "site/static/styles.css",
@@ -48,6 +49,26 @@ None (local-only). Ensure the server is not exposed publicly.
 - Response: Plain text of the file contents.
 - Errors: 404 with `{ "detail": "ERROR: file not found: ..." }` if missing.
 
+### GET /messages
+- Purpose: Retrieve chat/log messages for a run (for chat/console UI).
+- Query params:
+  - `run_id` (string, required)
+  - `cursor` (integer, optional, default 0; starting index to return)
+- Response (200):
+```json
+{
+  "run_id": "9f4c0e8dd34a42a0b1e7462c4d61c1f8",
+  "cursor": 0,
+  "next_cursor": 6,
+  "messages": [
+    { "role": "system", "content": "..." },
+    { "role": "user", "content": "build a cafe landing page" },
+    { "role": "assistant", "content": "..." }
+  ]
+}
+```
+- Errors: 404 if `run_id` not found; 400 if cursor is negative.
+
 ## Example cURL Flow
 1) Generate:
 ```bash
@@ -63,9 +84,13 @@ curl http://127.0.0.1:8000/files
 ```bash
 curl http://127.0.0.1:8000/files/site/index.html
 ```
+4) Fetch messages:
+```bash
+curl "http://127.0.0.1:8000/messages?run_id=YOUR_RUN_ID&cursor=0"
+```
 
 ## Running the API
-From the repo root (`C:\code\ML\Locable`):
+From the repo root:
 ```bash
 uvicorn locable.api:app --reload
 ```
