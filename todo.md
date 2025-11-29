@@ -1,0 +1,14 @@
+- [ ] Predefined CSS packs: bootstrap.min.css + bootstrap.theme.css; :root token map (colors spacing radii shadows typography motion); token-to-bootstrap utility mapping table; versioned pack names; example usage snippets per pack
+- [ ] Theme loader logic: restrict CSS selection to approved packs; disallow inline styles except token-safe overrides; validation that all colors/fonts come from pack tokens
+- [ ] Bootstrap template library: hero/marketing/dashboard/form-heavy/page-shell templates; responsive grid patterns; sample content blocks; include spacing rhythm and container widths; documented slots the agent fills
+- [ ] Scaffold presets: boilerplate index.html with head tags, linked CSS/JS, meta viewport, base layout grid; navbar/footer variants; optional sidebar layout; print-ready hook for future exports
+- [ ] Component recipe bank: cards with media/badges; stats tiles; timelines; CTA bars; tables with sticky header + striped rows; form groups with help/error text; modal/drawer patterns; code snippets for each with token usage notes
+- [ ] Multi-site generation flow: accept batch of page specs; iterate pack + template selection per page; shared assets folder; consistent nav + footer; cross-page typography harmony check
+- [ ] GUI builder mode: generate configuration UI (theme picker, template selector, content slots, preview pane); event wiring for live preview using bootstrap.bundle.min.js; export/download buttons for HTML/CSS bundle
+- [ ] Asset guidance: image aspect ratios per template; placeholder rules; icon set choice; corner treatment rules; gradient and shadow tiers; motion durations/easings tokens
+- [ ] Prompt guardrails: remind agent to use only predefined CSS packs + templates; forbid inventing new classes; encourage semantic HTML + ARIA; checklist injected before final output
+- [ ] Quality gates: lint HTML; accessibility check (contrast, labels, focus-visible); responsive breakpoints sanity; no remote fonts/scripts unless whitelisted
+- [ ] Visual regression hook: optional Playwright screenshot harness for golden images per template + pack; compare on change; store baselines locally
+- [ ] Content heuristics: headline/subhead length ranges; button label verbs; list density limits; avoid lorem ipsum�use domain-tailored placeholders
+- [ ] Evaluation dataset: sample page specs with expected layouts/components; pass/fail rules; track model performance over time
+- [ ] Documentation: short README for packs/templates/recipes; usage examples; troubleshooting; changelog for tokens and templates
