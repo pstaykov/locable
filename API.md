@@ -32,12 +32,14 @@ None (local-only). Ensure the server is not exposed publicly.
   "run_id": "9f4c0e8dd34a42a0b1e7462c4d61c1f8",
   "files": [
     "site/index.html",
+    "site/about.html",
     "site/static/styles.css",
     "site/static/script.js"
   ]
 }
 ```
 - Errors: 500 with `{ "detail": "..." }` if the agent raises.
+- Notes: The `files` list will include any extra HTML pages (e.g., `site/about.html`, `site/blog.html`) when the user requests a multi-page site.
 
 ### GET /files
 - Purpose: List generated files under `site/`.

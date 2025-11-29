@@ -276,8 +276,8 @@ class BuilderAgent:
         # append user message
         self.messages.append({"role": "user", "content": user_input})
 
-        # inject retrieval context for grounding
-        self._append_retrieval_context(user_input, k=5)
+        # inject retrieval context for grounding (use larger k for more variety)
+        self._append_retrieval_context(user_input, k=8)
 
         loop_guard = 0
 

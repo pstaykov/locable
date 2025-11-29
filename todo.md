@@ -1,5 +1,6 @@
 - [ ] CSS template model that only generates html
 - [ ] few shot prompting with examples so the model knows what a good website looks like
-- [ ] convince/polish model to generate longer css by increasing top k or letting the model decide top k
-- [ ] decide on root accent/text/backround color ect. for consistent style
+- [x] convince/polish model to generate longer css by increasing top k or letting the model decide top k
+- [x] decide on root accent/text/backround color ect. for consistent style
 - [ ] GUI survey type section for detailed generated prompts.
+- [x] multi page generation

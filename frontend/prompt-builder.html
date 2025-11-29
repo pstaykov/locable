@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Survey · Locable Builder</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="static/styles.css">
+</head>
+<body class="prompt-page">
+  <header class="navbar prompt-navbar">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <span class="navbar-brand mb-0">
+          <i class="bi bi-magic"></i> Prompt Survey
+        </span>
+        <span class="status-pill" id="apiStatus">Checking API...</span>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a class="btn btn-sm btn-outline-light" href="/">
+          <i class="bi bi-columns-gap me-1"></i> Open Builder
+        </a>
+        <button class="btn btn-sm btn-accent" id="sendPromptBtn" type="button">
+          <i class="bi bi-send-fill me-1"></i> Send to model
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="prompt-content container-fluid">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <section class="panel prompt-card">
+          <div class="prompt-card-header">
+            <div>
+              <p class="eyebrow">Guided survey</p>
+              <h2 class="h5 mb-1">Capture every requirement</h2>
+              <p class="text-muted small mb-0">We’ll turn these answers into a natural-language f-string prompt for the builder.</p>
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+              <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" id="htmlOnlyToggle">
+                <label class="form-check-label small" for="htmlOnlyToggle">HTML-only template</label>
+              </div>
+              <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" id="debugToggle">
+                <label class="form-check-label small" for="debugToggle">Debug</label>
+              </div>
+            </div>
+          </div>
+
+          <form id="promptSurvey" class="survey-grid">
+            <div class="form-floating">
+              <input type="text" class="form-control" id="sitePurpose" placeholder="Product launch for a new wearable" required>
+              <label for="sitePurpose">Topic / purpose *</label>
+            </div>
+
+            <div class="form-floating">
+              <input type="text" class="form-control" id="themeStyle" placeholder="Bold, editorial, high-conversion">
+              <label for="themeStyle">Theme & visual tone</label>
+            </div>
+
+            <div class="form-floating">
+              <input type="text" class="form-control" id="colorPalette" placeholder="Deep navy background, coral accent, warm neutrals">
+              <label for="colorPalette">Color palette</label>
+            </div>
+
+            <div class="form-floating">
+              <input type="text" class="form-control" id="typography" placeholder="Headings in a geometric sans; body in a humanist sans">
+              <label for="typography">Typography preferences</label>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating h-100">
+                  <textarea class="form-control" placeholder="Hero headline and CTA" id="heroText" style="height: 120px"></textarea>
+                  <label for="heroText">Hero focus & CTA</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating h-100">
+                  <textarea class="form-control" placeholder="Home, About, Products, Pricing, Blog, Contact" id="menuItems" style="height: 120px"></textarea>
+                  <label for="menuItems">Menu items / nav</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating h-100">
+                  <textarea class="form-control" placeholder="Brand story, credibility notes, differentiators" id="aboutText" style="height: 120px"></textarea>
+                  <label for="aboutText">About / story</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating h-100">
+                  <textarea class="form-control" placeholder="Email, phone, location, form needs, booking link" id="contactInfo" style="height: 120px"></textarea>
+                  <label for="contactInfo">Contact info / CTA</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-floating">
+              <textarea class="form-control" placeholder="Testimonials, feature grid, FAQ, timeline, gallery, blog teasers" id="extraSections" style="height: 120px"></textarea>
+              <label for="extraSections">Extra sections or must-have features</label>
+            </div>
+
+            <div class="form-floating">
+              <textarea class="form-control" placeholder="Accessibility constraints, performance goals, avoid heavy video, etc." id="constraints" style="height: 120px"></textarea>
+              <label for="constraints">Constraints / must-avoid</label>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-end">
+              <button class="btn btn-outline-light" id="resetBtn" type="button">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset survey
+              </button>
+              <button class="btn btn-accent" id="generatePromptBtn" type="button">
+                <i class="bi bi-stars me-1"></i> Generate prompt
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <div class="col-lg-5">
+        <section class="panel prompt-card sticky-panel">
+          <div class="prompt-card-header">
+            <div>
+              <p class="eyebrow">Prompt preview</p>
+              <h2 class="h5 mb-1">Natural-language f-string</h2>
+              <p class="text-muted small mb-0">Review or tweak before sending. The builder will receive this directly.</p>
+            </div>
+            <span class="text-muted small" id="charCount">0 chars</span>
+          </div>
+
+          <div class="prompt-preview">
+            <textarea id="promptPreview" class="form-control" rows="14" spellcheck="false"></textarea>
+            <div class="prompt-meta">
+              <span class="badge bg-secondary-subtle text-light" id="modeBadge">Mode: full build</span>
+              <span class="badge bg-secondary-subtle text-light" id="debugBadge">Debug: off</span>
+            </div>
+          </div>
+
+          <div class="run-status" id="runStatus">
+            Waiting to generate a prompt.
+          </div>
+          <div class="generation-result" id="generationResult" hidden>
+            <p class="mb-1"><strong>Last run:</strong> <span id="runId"></span></p>
+            <p class="small mb-2" id="runMessage"></p>
+            <div id="runFiles" class="small text-muted"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="static/prompt-builder.js"></script>
+</body>
+</html>

@@ -10,6 +10,9 @@ from pydantic import BaseModel, Field
 
 from .agent.builder_agent import BuilderAgent
 from .agent.tools import list_files, read_file
+from .rag.vectorstore import LocalVectorStore
+from pathlib import Path
+import shutil
 
 app = FastAPI(
     title="Locable Builder API",
@@ -22,6 +25,9 @@ RUN_MESSAGES: Dict[str, List[dict]] = {}
 # Get the directory containing this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SITE_DIR = os.path.join(BASE_DIR, "frontend")
+ROOT_DIR = Path(__file__).resolve().parent
+TEMPLATE_DIR = ROOT_DIR / "data" / "templates"
+BOOTSTRAP_DIR = ROOT_DIR / "data" / "bootstrap"
 
 # Mount static files
 if os.path.exists(SITE_DIR):
@@ -33,6 +39,7 @@ class GenerateRequest(BaseModel):
     model: Optional[str] = Field(None, description="Override the model name for this run.")
     host: Optional[str] = Field(None, description="Override the Ollama host URL.")
     debug: bool = Field(False, description="Log full agent responses to the server console.")
+    mode: str = Field("full", description="Generation mode: 'full' (LLM) or 'html-only' (template copy).")
 
 
 class GenerateResponse(BaseModel):
@@ -55,18 +62,116 @@ async def _run_builder(req: GenerateRequest, run_id: str) -> str:
 
     def runner():
         result = agent.ask(req.prompt, req.debug)
-        # snapshot message history for retrieval
-        RUN_MESSAGES[run_id] = [
-            {
-                "role": m.get("role"),
-                "content": m.get("content"),
-                "tool_calls": m.get("tool_calls"),
-            }
-            for m in agent.messages
-        ]
+        # snapshot full message history for retrieval/debug UI
+        RUN_MESSAGES[run_id] = agent.messages.copy()
         return result
 
     return await asyncio.to_thread(runner)
+
+
+def _copy_bootstrap_to_site():
+    """Ensure site/static has bootstrap assets for html-only mode."""
+    for dest_root in [
+        ROOT_DIR / "site" / "static",
+        ROOT_DIR / "frontend" / "static",
+    ]:
+        dest_root.mkdir(parents=True, exist_ok=True)
+        for fname in ("bootstrap.min.css", "bootstrap.bundle.min.js"):
+            src = BOOTSTRAP_DIR / fname
+            dst = dest_root / fname
+            if src.exists():
+                shutil.copy(src, dst)
+
+
+def _pick_template(prompt: str) -> tuple[str, Path]:
+    store = LocalVectorStore(persist_dir=str(ROOT_DIR / "data" / "chroma"), collection_name="bootstrap")
+    hits = store.search_templates(prompt, k=1)
+
+    # Fallback: broaden search if description-only filter returned nothing
+    if not hits:
+        try:
+            broad = store.search(prompt, k=3, include_meta=True)
+            docs = (broad.get("documents") or [[]])[0]
+            metas = (broad.get("metadatas") or [[]])[0]
+            if docs and metas:
+                template_name = metas[0].get("template")
+                if template_name:
+                    hits = [{"template": template_name}]
+        except Exception:
+            hits = []
+
+    if not hits:
+        raise HTTPException(status_code=404, detail="No templates found for the given description.")
+
+    template_name = hits[0].get("template")
+    if not template_name:
+        raise HTTPException(status_code=404, detail="Template metadata missing.")
+    template_root = TEMPLATE_DIR / template_name
+    if not template_root.exists():
+        raise HTTPException(status_code=404, detail=f"Template directory not found: {template_name}")
+    return template_name, template_root
+
+
+def _find_main_html(template_root: Path) -> Path:
+    index_path = template_root / "index.html"
+    if index_path.exists():
+        return index_path
+    html_files = sorted(template_root.rglob("*.html"))
+    if not html_files:
+        raise HTTPException(status_code=404, detail="No HTML files found in template.")
+    return html_files[0]
+
+
+def _sanitize_html_for_bootstrap_only(html: str) -> str:
+    """Strip non-Bootstrap CSS/JS links and ensure local bootstrap assets are referenced."""
+    import re
+
+    # remove link tags that do not mention bootstrap
+    def strip_non_bootstrap(match):
+        tag = match.group(0)
+        if "bootstrap" not in tag.lower():
+            return ""
+        return tag
+
+    html = re.sub(r"<link[^>]*rel=[\"']stylesheet[\"'][^>]*>", strip_non_bootstrap, html, flags=re.IGNORECASE)
+
+    # remove script tags that do not mention bootstrap
+    def strip_non_bootstrap_script(match):
+        tag = match.group(0)
+        if "bootstrap" not in tag.lower():
+            return ""
+        return tag
+
+    html = re.sub(r"<script[^>]*></script>", "", html, flags=re.IGNORECASE)
+    html = re.sub(r"<script[^>]*>.*?</script>", strip_non_bootstrap_script, html, flags=re.IGNORECASE | re.DOTALL)
+
+    # enforce local bootstrap asset references
+    if "bootstrap.min.css" not in html:
+        html = html.replace("</head>", '  <link rel="stylesheet" href="static/bootstrap.min.css">\n</head>')
+    else:
+        html = re.sub(r'href=["\'][^"\']*bootstrap[^"\']*\.css["\']', 'href="static/bootstrap.min.css"', html, flags=re.IGNORECASE)
+
+    if "bootstrap.bundle.min.js" not in html:
+        html = html.replace("</body>", '  <script src="static/bootstrap.bundle.min.js"></script>\n</body>')
+    else:
+        html = re.sub(r'src=["\'][^"\']*bootstrap[^"\']*bundle[^"\']*\.js["\']', 'src="static/bootstrap.bundle.min.js"', html, flags=re.IGNORECASE)
+
+    return html
+
+
+def _generate_html_only(prompt: str) -> str:
+    template_name, template_root = _pick_template(prompt)
+    main_html_path = _find_main_html(template_root)
+    raw_html = main_html_path.read_text(encoding="utf-8", errors="ignore")
+    sanitized_html = _sanitize_html_for_bootstrap_only(raw_html)
+
+    # ensure site/static/bootstrap assets exist
+    _copy_bootstrap_to_site()
+
+    target = ROOT_DIR / "site" / "index.html"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(sanitized_html, encoding="utf-8")
+    return f"HTML-only build created from template '{template_name}' using {main_html_path.name}"
 
 
 @app.get("/health")
@@ -81,6 +186,21 @@ async def root():
     if not os.path.exists(index_path):
         raise HTTPException(status_code=404, detail="index.html not found")
     return FileResponse(index_path, media_type="text/html")
+
+
+@app.get("/prompt-builder")
+async def prompt_builder():
+    """Serve the survey-driven prompt builder page."""
+    page_path = os.path.join(SITE_DIR, "prompt-builder.html")
+    if not os.path.exists(page_path):
+        raise HTTPException(status_code=404, detail="prompt-builder.html not found")
+    return FileResponse(page_path, media_type="text/html")
+
+
+@app.get("/prompt-builder.html")
+async def prompt_builder_html():
+    """Alias for prompt builder with .html suffix."""
+    return await prompt_builder()
 
 
 @app.get("/files", response_model=List[str])
@@ -104,7 +224,15 @@ async def generate(req: GenerateRequest):
     """Trigger a build from the frontend and return the agent's summary plus written files."""
     run_id = uuid4().hex
     try:
-        message = await _run_builder(req, run_id)
+        if req.mode == "html-only":
+            message = _generate_html_only(req.prompt)
+            RUN_MESSAGES[run_id] = [
+                {"role": "user", "content": req.prompt},
+                {"role": "assistant", "content": message},
+            ]
+        else:
+            message = await _run_builder(req, run_id)
+            _copy_bootstrap_to_site()
         files = list_files("site")
         return {"status": "ok", "message": message, "run_id": run_id, "files": files}
     except Exception as exc:

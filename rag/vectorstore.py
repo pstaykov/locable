@@ -88,7 +88,7 @@ class LocalVectorStore:
 
         return len(docs)
 
-    def search(self, query: str, k: int = 3, where: Optional[Dict[str, Any]] = None, include_meta: bool = False) -> Any:
+    def search(self, query: str, k: int = 8, where: Optional[Dict[str, Any]] = None, include_meta: bool = False) -> Any:
         """Return top-k documents for the query, optionally including metadata."""
         res = self.chroma.query(query, n_results=k, where=where)
         if include_meta:

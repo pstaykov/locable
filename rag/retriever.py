@@ -13,7 +13,7 @@ class Retriever:
     def __init__(self, persist_dir: str = "data/chroma", collection_name: str = "bootstrap"):
         self.store = LocalVectorStore(persist_dir=persist_dir, collection_name=collection_name)
 
-    def get_relevant(self, query: str, k: int = 3) -> List[Dict]:
+    def get_relevant(self, query: str, k: int = 20) -> List[Dict]:
         """Return a list of results: {document, metadata, distance} ordered by relevance."""
         # Use the underlying chroma query via the adapter
         res = self.store.chroma.query(query, n_results=k)

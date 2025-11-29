@@ -14,6 +14,7 @@ const loadingModal = document.getElementById('loadingModal');
 const generatingMessage = document.getElementById('generatingMessage');
 const generationTime = document.getElementById('generationTime');
 const statusText = document.querySelector('.status-text');
+const htmlOnlyMode = document.getElementById('htmlOnlyMode');
 
 let currentGeneratedFiles = [];
 let isGenerating = false;
@@ -161,6 +162,7 @@ async function generateWebsite(prompt) {
       body: JSON.stringify({
         prompt: prompt,
         debug: debugMode.checked,
+        mode: htmlOnlyMode && htmlOnlyMode.checked ? 'html-only' : 'full',
       }),
     });
 
