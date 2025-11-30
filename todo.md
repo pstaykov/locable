@@ -4,3 +4,4 @@
 - [x] decide on root accent/text/backround color ect. for consistent style
 - [ ] GUI survey type section for detailed generated prompts.
 - [x] multi page generation
+- [ ] add docker image and github versions
