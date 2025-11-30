@@ -32,6 +32,7 @@ class BuilderAgent:
 
         # conversation state
         self.messages = [{"role": "system", "content": self.system_prompt}]
+        self.retrieval_tag = "retrieval"  # track retrieval system messages for pruning
 
         # retrieval layer
         self.store = LocalVectorStore(
@@ -142,7 +143,13 @@ class BuilderAgent:
             return False
 
         snippet = "\n\n".join(snippet_parts) + "\n"
-        self.messages.append({"role": "system", "content": snippet})
+        # Keep only the latest retrieval context to avoid log bloat.
+        self.messages = [
+            m for m in self.messages if m.get("name") != self.retrieval_tag
+        ]
+        self.messages.append(
+            {"role": "system", "name": self.retrieval_tag, "content": snippet}
+        )
         return True
 
     # -------------------------------------------------------------
@@ -303,6 +310,11 @@ class BuilderAgent:
 
             # no tool calls -> final natural language answer
             print("\n===== FINAL ANSWER =====\n")
+            # Persist the assistant reply so future turns retain it.
+            self.messages.append({
+                "role": assistant.get("role", "assistant"),
+                "content": content
+            })
             return content
 
 

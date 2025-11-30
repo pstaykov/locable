@@ -4,7 +4,7 @@ import os
 from typing import Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import PlainTextResponse, FileResponse
+from fastapi.responses import PlainTextResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -181,11 +181,8 @@ async def health():
 
 @app.get("/")
 async def root():
-    """Serve the index.html file."""
-    index_path = os.path.join(SITE_DIR, "index.html")
-    if not os.path.exists(index_path):
-        raise HTTPException(status_code=404, detail="index.html not found")
-    return FileResponse(index_path, media_type="text/html")
+    """Redirect to the prompt builder for the default landing experience."""
+    return RedirectResponse(url="/prompt-builder", status_code=307)
 
 
 @app.get("/prompt-builder")
@@ -201,6 +198,21 @@ async def prompt_builder():
 async def prompt_builder_html():
     """Alias for prompt builder with .html suffix."""
     return await prompt_builder()
+
+
+@app.get("/builder")
+async def builder():
+    """Explicit route for the original builder UI."""
+    index_path = os.path.join(SITE_DIR, "index.html")
+    if not os.path.exists(index_path):
+        raise HTTPException(status_code=404, detail="index.html not found")
+    return FileResponse(index_path, media_type="text/html")
+
+
+@app.get("/builder.html")
+async def builder_html():
+    """Alias to serve the builder UI with .html suffix."""
+    return await builder()
 
 
 @app.get("/files", response_model=List[str])

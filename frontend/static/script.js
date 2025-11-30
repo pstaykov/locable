@@ -21,6 +21,7 @@ let isGenerating = false;
 let startTime = null;
 let currentRunId = null;
 let messageCursor = 0;
+let messagesInterval = null;
 
 // Resizer functionality
 let isResizing = false;
@@ -142,6 +143,11 @@ async function sendMessage() {
 async function generateWebsite(prompt) {
   if (isGenerating) return;
 
+  if (messagesInterval) {
+    clearInterval(messagesInterval);
+    messagesInterval = null;
+  }
+
   isGenerating = true;
   startTime = Date.now();
   chatInput.disabled = true;
@@ -176,10 +182,15 @@ async function generateWebsite(prompt) {
     currentRunId = result.run_id || null;
     messageCursor = 0;
 
+    if (result.message) {
+      addAssistantMessage(result.message);
+    }
+
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
     generationTime.textContent = `Generated in ${elapsed}s`;
 
     await loadMessages(true);
+    messagesInterval = setInterval(() => loadMessages(), 2000);
     await loadFiles(result.files);
 
     if (result.files.length > 0) {

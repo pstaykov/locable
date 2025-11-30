@@ -18,7 +18,7 @@
         <span class="status-pill" id="apiStatus">Checking API...</span>
       </div>
       <div class="d-flex align-items-center gap-2 flex-wrap">
-        <a class="btn btn-sm btn-outline-light" href="/">
+        <a class="btn btn-sm btn-outline-light" href="/builder">
           <i class="bi bi-columns-gap me-1"></i> Open Builder
         </a>
         <button class="btn btn-sm btn-accent" id="sendPromptBtn" type="button">
@@ -52,35 +52,35 @@
 
           <form id="promptSurvey" class="survey-grid">
             <div class="form-floating">
-              <input type="text" class="form-control" id="sitePurpose" placeholder="Product launch for a new wearable" required>
+              <input type="text" class="form-control" id="sitePurpose" placeholder="Infer a concise purpose from context and keep the build focused." required>
               <label for="sitePurpose">Topic / purpose *</label>
             </div>
 
             <div class="form-floating">
-              <input type="text" class="form-control" id="themeStyle" placeholder="Bold, editorial, high-conversion">
+              <input type="text" class="form-control" id="themeStyle" placeholder="Modern, conversion-focused, mobile-first layout with confident visuals.">
               <label for="themeStyle">Theme & visual tone</label>
             </div>
 
             <div class="form-floating">
-              <input type="text" class="form-control" id="colorPalette" placeholder="Deep navy background, coral accent, warm neutrals">
+              <input type="text" class="form-control" id="colorPalette" placeholder="Pick a cohesive palette with a strong accent and readable contrast.">
               <label for="colorPalette">Color palette</label>
             </div>
 
             <div class="form-floating">
-              <input type="text" class="form-control" id="typography" placeholder="Headings in a geometric sans; body in a humanist sans">
+              <input type="text" class="form-control" id="typography" placeholder="Readable modern sans-serif headings with complementary body text.">
               <label for="typography">Typography preferences</label>
             </div>
 
             <div class="row g-3">
               <div class="col-md-6">
                 <div class="form-floating h-100">
-                  <textarea class="form-control" placeholder="Hero headline and CTA" id="heroText" style="height: 120px"></textarea>
+                  <textarea class="form-control" placeholder="Punchy headline with supporting value props and a primary CTA." id="heroText" style="height: 120px"></textarea>
                   <label for="heroText">Hero focus & CTA</label>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-floating h-100">
-                  <textarea class="form-control" placeholder="Home, About, Products, Pricing, Blog, Contact" id="menuItems" style="height: 120px"></textarea>
+                  <textarea class="form-control" placeholder="Home, About, Services, Gallery, Blog, Contact" id="menuItems" style="height: 120px"></textarea>
                   <label for="menuItems">Menu items / nav</label>
                 </div>
               </div>
@@ -89,25 +89,25 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <div class="form-floating h-100">
-                  <textarea class="form-control" placeholder="Brand story, credibility notes, differentiators" id="aboutText" style="height: 120px"></textarea>
+                  <textarea class="form-control" placeholder="Explain the brand story, credibility, and differentiators." id="aboutText" style="height: 120px"></textarea>
                   <label for="aboutText">About / story</label>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-floating h-100">
-                  <textarea class="form-control" placeholder="Email, phone, location, form needs, booking link" id="contactInfo" style="height: 120px"></textarea>
+                  <textarea class="form-control" placeholder="Include contact form plus direct email/phone and hours/location if relevant." id="contactInfo" style="height: 120px"></textarea>
                   <label for="contactInfo">Contact info / CTA</label>
                 </div>
               </div>
             </div>
 
             <div class="form-floating">
-              <textarea class="form-control" placeholder="Testimonials, feature grid, FAQ, timeline, gallery, blog teasers" id="extraSections" style="height: 120px"></textarea>
+              <textarea class="form-control" placeholder="Testimonials, highlights/feature grid, FAQ, and a rich footer." id="extraSections" style="height: 120px"></textarea>
               <label for="extraSections">Extra sections or must-have features</label>
             </div>
 
             <div class="form-floating">
-              <textarea class="form-control" placeholder="Accessibility constraints, performance goals, avoid heavy video, etc." id="constraints" style="height: 120px"></textarea>
+              <textarea class="form-control" placeholder="Keep performance-friendly, accessible, and avoid heavy video or animation unless requested." id="constraints" style="height: 120px"></textarea>
               <label for="constraints">Constraints / must-avoid</label>
             </div>
 

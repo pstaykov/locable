@@ -4,7 +4,7 @@
   --panel: #1a1c21;
   --panel-alt: #16181c;
   --ink: #f7f7f7;
-  --muted: #a4a8b3;
+  --muted: #d6d2ca;
   --border: #2a2d33;
   --accent: #e9923c;
   --accent-strong: #e78b2e;
@@ -442,6 +442,12 @@ header.navbar {
   margin-bottom: 1rem;
 }
 
+.prompt-card .text-muted,
+.prompt-card .text-muted.small,
+.prompt-card .text-muted.small.mb-0 {
+  color: #e2e6ef !important;
+}
+
 .survey-grid {
   display: flex;
   flex-direction: column;
@@ -455,6 +461,13 @@ header.navbar {
 }
 
 .survey-grid .form-control:focus {
+  background: var(--panel-alt);
+  color: var(--ink);
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.survey-grid .form-control:focus {
   border-color: var(--accent);
   box-shadow: none;
 }
@@ -463,10 +476,19 @@ header.navbar {
   color: var(--muted);
 }
 
+.survey-grid .form-floating > label {
+  color: var(--muted);
+}
+
+.survey-grid .form-floating > .form-control:focus ~ label,
+.survey-grid .form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: var(--ink);
+}
+
 .prompt-preview textarea {
   width: 100%;
-  background: #0f1115;
-  color: var(--ink);
+  background: #0f1115 !important;
+  color: var(--ink) !important;
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1rem;
@@ -474,6 +496,13 @@ header.navbar {
   resize: vertical;
   font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
   font-size: 0.9rem;
+}
+
+.prompt-preview textarea:focus {
+  background: #0f1115 !important;
+  color: var(--ink) !important;
+  border-color: var(--accent);
+  box-shadow: none;
 }
 
 .prompt-meta {
@@ -620,7 +649,8 @@ header.navbar {
 }
 
 #generatingMessage {
-  color: #ffffff;
+  color: #ffffff !important;
+  --bs-text-opacity: 1;
 }
 
 .spinner-border { 

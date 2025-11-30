@@ -116,7 +116,7 @@ Content plan:
 
 Constraints or must-avoid: ${filled(data.constraints, "Keep performance-friendly, accessible, and avoid heavy video or animation unless requested.")}
 
-Use these inputs to write the site files through your tools and keep the tone polished and natural."""
+Use these inputs to write the site files through your tools and keep the tone polished and natural."""`;
   return prompt.trim();
 }
 
@@ -181,7 +181,7 @@ function renderFiles(files) {
     runFilesEl.textContent = "No files returned yet.";
     return;
   }
-  const list = files.map((f) => `• ${f}`).join("\n");
+  const list = files.map((f) => `- ${f}`).join("\n");
   runFilesEl.textContent = list;
 }
 
