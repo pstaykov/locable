@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import os
@@ -13,6 +14,7 @@ from .tools import (
 from .final_model import FinalModelClient
 from ..rag.vectorstore import LocalVectorStore
 
+ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
 class BuilderAgent:
     """
@@ -139,7 +141,7 @@ class BuilderAgent:
                 for i, doc in enumerate(docs[:k]):
                     meta = metas[i] or {}
                     label = meta.get("template") or meta.get("source") or ""
-                    snippet_parts.append(f"[{i+1}] {label} :: {doc[:600].replace('\n', ' ')}")
+                    snippet_parts.append(f"[{i+1}] {label} :: {doc[:600]}")
 
         if not snippet_parts:
             return False
@@ -368,7 +370,8 @@ if __name__ == "__main__":
         )
 
     args = _parse_args()
-    agent = BuilderAgent(model=args.model, host=args.host)
+    host = args.host if args.host is not None else ollama_host
+    agent = BuilderAgent(model=args.model, host=host)
     _print_banner(agent, args.debug)
 
     while True:

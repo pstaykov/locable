@@ -17,9 +17,6 @@ services:
     volumes:
       - ollama_models:/root/.ollama
 
-    ports:
-      - "11434:11434"
-
     restart: unless-stopped
 
     entrypoint:
@@ -34,14 +31,14 @@ services:
         wait
 
   locable:
-    image: ghcr.io/pstaykov/locable:latest
+    image: locable:latest
     container_name: locable
 
     environment:
       OLLAMA_HOST: "http://ollama:11434"
 
     ports:
-      - "8000:8000"
+      - "9200:9200"
 
     depends_on:
       - ollama

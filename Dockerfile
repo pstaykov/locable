@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy ONLY the Python package folder into the container
 COPY locable /app/locable
 
-EXPOSE 8000
+EXPOSE 9200
 
 # Start the FastAPI API server
-CMD ["uvicorn", "locable.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "locable.api:app", "--host", "0.0.0.0", "--port", "9200"]

@@ -1,4 +1,4 @@
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = 'http://127.0.0.1:9200';
 
 // DOM Elements
 const chatInput = document.getElementById('chatInput');
@@ -130,7 +130,7 @@ async function checkHealth() {
     addSystemMessage('Connected to API server');
     statusText.textContent = 'Connected';
   } catch (error) {
-    addSystemMessage('Cannot connect to API server. Ensure it is running on port 8000.');
+    addSystemMessage('Cannot connect to API server. Ensure it is running on port 9200.');
     statusText.textContent = 'Disconnected';
   }
 }

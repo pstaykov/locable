@@ -1,4 +1,5 @@
 import asyncio
+import os
 from uuid import uuid4
 from pathlib import Path
 import shutil
@@ -12,6 +13,8 @@ from pydantic import BaseModel, Field
 from .agent.builder_agent import BuilderAgent
 from .agent.tools import ROOT_DIR, list_files, read_file
 from .rag.vectorstore import LocalVectorStore
+
+ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
 app = FastAPI(
     title="Locable Builder API",
@@ -61,7 +64,7 @@ class MessagesResponse(BaseModel):
 
 async def _run_builder(req: GenerateRequest, run_id: str) -> str:
     """Run the builder agent in a worker thread to keep the event loop responsive."""
-    agent = BuilderAgent(model=req.model, host=req.host)
+    agent = BuilderAgent(model=req.model, host=ollama_host)
 
     def runner():
         result = agent.ask(req.prompt, req.debug)
