@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML-Only Generator · Locable Builder</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="static/styles.css">
+  <link rel="stylesheet" href="static/html-only.css">
+</head>
+<body class="prompt-page">
+  <header class="navbar prompt-navbar">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <span class="navbar-brand mb-0">
+          <i class="bi bi-file-earmark-code"></i> HTML-Only Generator
+        </span>
+        <span class="status-pill" id="apiStatus">Checking API...</span>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a class="btn btn-sm btn-outline-light" href="prompt-builder.html">
+          <i class="bi bi-magic me-1"></i> Prompt Survey
+        </a>
+        <a class="btn btn-sm btn-outline-light" href="index.html">
+          <i class="bi bi-columns-gap me-1"></i> Full Builder
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="prompt-content container-fluid">
+    <div class="row g-4">
+      <!-- Left Column: Content Description -->
+      <div class="col-lg-5">
+        <!-- Content Input Section -->
+        <section class="content-description-section">
+          <p class="section-title">Step 1: Describe your content</p>
+          <h2 class="template-selection-title">What should your website say?</h2>
+          <p class="template-selection-subtitle">Describe the content, text, and information you want on your website.</p>
+
+          <form id="contentForm">
+            <div class="mb-3">
+              <label for="businessName" class="form-label">Business/Project Name</label>
+              <input type="text" class="form-control" id="businessName" placeholder="e.g., Acme Coffee Shop">
+            </div>
+
+            <div class="mb-3">
+              <label for="mainContent" class="form-label">Main Content *</label>
+              <textarea 
+                class="form-control" 
+                id="mainContent" 
+                rows="8" 
+                placeholder="Describe what your website should communicate. Include:&#10;• Main headline and tagline&#10;• Key services or products&#10;• About section content&#10;• Call-to-action text&#10;• Contact information&#10;• Any other important content"
+                required
+              ></textarea>
+              <div class="form-text">Be specific about the text and messaging you want.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="additionalSections" class="form-label">Additional Sections</label>
+              <textarea 
+                class="form-control" 
+                id="additionalSections" 
+                rows="4" 
+                placeholder="List any additional sections you need:&#10;• Testimonials&#10;• FAQ&#10;• Team members&#10;• Portfolio items"
+              ></textarea>
+            </div>
+          </form>
+        </section>
+
+        <!-- Template Selection Section -->
+        <section class="content-description-section">
+          <p class="section-title">Step 2: Choose a template</p>
+          <h2 class="template-selection-title">Pick your design</h2>
+          <p class="template-selection-subtitle">Select a Bootstrap template that matches your style.</p>
+
+          <div class="templates-grid" id="templatesGrid">
+            <!-- Templates will be populated by JavaScript -->
+          </div>
+
+          <div class="sticky-generate">
+            <div class="generate-info">
+              <span id="selectedTemplate">No template selected</span>
+            </div>
+            <button class="btn btn-accent" id="generateBtn" disabled>
+              <i class="bi bi-lightning-charge-fill me-1"></i> Generate Website
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column: Preview -->
+      <div class="col-lg-7">
+        <section class="preview-section sticky-preview">
+          <div class="preview-header">
+            <h3 class="preview-title">Preview</h3>
+            <div class="preview-actions">
+              <button class="btn btn-sm btn-outline-light" id="downloadBtn" disabled>
+                <i class="bi bi-download me-1"></i> Download
+              </button>
+              <button class="btn btn-sm btn-outline-light" id="copyCodeBtn" disabled>
+                <i class="bi bi-clipboard me-1"></i> Copy HTML
+              </button>
+              <button class="btn btn-sm btn-outline-light" id="refreshPreviewBtn">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-light" id="fullscreenBtn">
+                <i class="bi bi-arrows-fullscreen"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="preview-container">
+            <div class="preview-placeholder" id="previewPlaceholder">
+              <i class="bi bi-eye"></i>
+              <p>Your generated website will appear here</p>
+              <p class="text-muted small">Describe your content and choose a template to get started</p>
+            </div>
+            <iframe id="htmlPreview" class="html-preview-frame" sandbox="allow-same-origin allow-scripts allow-forms" hidden></iframe>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Loading Modal -->
+  <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center py-5">
+          <div class="spinner-border mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <h5>Generating your website...</h5>
+          <p class="text-white small mb-0" id="generatingMessage">Applying your content to the template</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="static/html-only.js"></script>
+</body>
+</html>
